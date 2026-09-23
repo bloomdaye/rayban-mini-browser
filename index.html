@@ -5,8 +5,10 @@
 
   <meta
     name="viewport"
-    content="width=device-width, initial-scale=1.0"
+    content="width=600, height=600, initial-scale=1.0, user-scalable=no"
   >
+
+  <meta name="theme-color" content="#000000">
 
   <title>Ray-Ban Mini Browser</title>
 
@@ -15,11 +17,11 @@
       box-sizing: border-box;
     }
 
+    html,
     body {
       width: 600px;
       height: 600px;
       margin: 0;
-      padding: 36px;
       overflow: hidden;
 
       background: #000;
@@ -28,75 +30,95 @@
       font-family: Arial, sans-serif;
     }
 
+    body {
+      padding: 30px;
+    }
+
     h1 {
-      margin: 0 0 12px;
-      font-size: 32px;
+      margin: 0 0 8px;
+      font-size: 34px;
     }
 
     .description {
-      margin-bottom: 28px;
-      color: #cccccc;
+      margin-bottom: 24px;
+      color: #bbb;
       font-size: 18px;
     }
 
-    form {
-      display: flex;
+    .address-bar {
+      display: grid;
+      grid-template-columns: 1fr 110px;
       gap: 12px;
-      margin-bottom: 30px;
+      margin-bottom: 24px;
+    }
+
+    input,
+    button,
+    a {
+      border: 3px solid #666;
+      border-radius: 14px;
+
+      background: #161616;
+      color: #fff;
+
+      font-size: 20px;
     }
 
     input {
-      flex: 1;
       min-width: 0;
-      padding: 18px;
-
-      border: 3px solid #777;
-      border-radius: 14px;
-
-      background: #171717;
-      color: white;
-      font-size: 20px;
+      padding: 16px;
     }
 
-    button,
-    .shortcut {
-      padding: 18px;
+    button {
+      padding: 16px;
+      cursor: pointer;
+    }
 
-      border: 3px solid #777;
-      border-radius: 14px;
+    a {
+      display: flex;
+      min-height: 94px;
 
-      background: #171717;
-      color: white;
-      font-size: 20px;
+      align-items: center;
+      justify-content: center;
+
+      padding: 16px;
+      text-align: center;
       text-decoration: none;
     }
 
-    button:focus,
     input:focus,
-    .shortcut:focus {
+    button:focus,
+    a:focus {
       border-color: #00ffcc;
       outline: none;
-      background: #263330;
+      background: #19332d;
+      box-shadow: 0 0 12px rgba(0, 255, 204, 0.65);
     }
 
     .shortcuts {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 16px;
+      gap: 14px;
+      margin-bottom: 20px;
     }
 
-    .shortcut {
-      display: flex;
-      min-height: 110px;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
     }
 
-    .status {
-      margin-top: 30px;
+    #status {
+      min-height: 48px;
+      margin-top: 22px;
+      padding: 12px;
+
+      border-radius: 10px;
+      background: #101918;
       color: #9dffeb;
+
       font-size: 16px;
+      line-height: 1.4;
     }
   </style>
 </head>
@@ -105,147 +127,311 @@
   <h1>Mini Browser</h1>
 
   <div class="description">
-    주소 또는 검색어를 입력하세요.
+    방향키로 이동하고 선택하세요.
   </div>
 
-  <form id="searchForm">
+  <div class="address-bar">
     <input
-      id="address"
-      class="focusable"
+      id="addressInput"
+      data-nav
+      data-label="주소 입력창"
       type="text"
-      placeholder="검색어 또는 주소"
+      placeholder="주소 또는 검색어"
       autocomplete="off"
+      tabindex="0"
     >
 
-    <button class="focusable" type="submit">
+    <button
+      id="openButton"
+      data-nav
+      data-label="열기"
+      type="button"
+      tabindex="0"
+    >
       열기
     </button>
-  </form>
+  </div>
 
   <div class="shortcuts">
     <a
-      class="shortcut focusable"
-      href="https://www.youtube.com/"
+      data-nav
+      data-label="YouTube"
+      tabindex="0"
+      href="https://m.youtube.com/"
     >
       YouTube
     </a>
 
     <a
-      class="shortcut focusable"
+      data-nav
+      data-label="Google"
+      tabindex="0"
       href="https://www.google.com/"
     >
       Google
     </a>
 
     <a
-      class="shortcut focusable"
+      data-nav
+      data-label="Wikipedia"
+      tabindex="0"
       href="https://www.wikipedia.org/"
     >
       Wikipedia
     </a>
 
     <button
-      id="backButton"
-      class="shortcut focusable"
+      id="testButton"
+      data-nav
+      data-label="선택 테스트"
       type="button"
+      tabindex="0"
     >
-      뒤로
+      선택 테스트
     </button>
   </div>
 
-  <div id="status" class="status">
-    방향키로 이동하고 Enter로 선택하세요.
+  <div class="controls">
+    <button
+      id="backButton"
+      data-nav
+      data-label="뒤로"
+      type="button"
+      tabindex="0"
+    >
+      뒤로
+    </button>
+
+    <button
+      id="homeButton"
+      data-nav
+      data-label="처음으로"
+      type="button"
+      tabindex="0"
+    >
+      처음으로
+    </button>
+  </div>
+
+  <div id="status">
+    앱이 준비되었습니다.
   </div>
 
   <script>
-    const form = document.getElementById("searchForm");
-    const address = document.getElementById("address");
-    const backButton = document.getElementById("backButton");
+    const addressInput =
+      document.getElementById("addressInput");
 
-    form.addEventListener("submit", function (event) {
-      event.preventDefault();
+    const openButton =
+      document.getElementById("openButton");
 
-      const value = address.value.trim();
+    const testButton =
+      document.getElementById("testButton");
 
-      if (!value) {
-        return;
-      }
+    const backButton =
+      document.getElementById("backButton");
 
-      let destination;
+    const homeButton =
+      document.getElementById("homeButton");
 
-      const looksLikeUrl =
-        value.startsWith("http://") ||
-        value.startsWith("https://") ||
-        value.includes(".");
+    const status =
+      document.getElementById("status");
 
-      if (looksLikeUrl) {
-        destination = value.startsWith("http")
-          ? value
-          : "https://" + value;
-      } else {
-        destination =
-          "https://www.google.com/search?q=" +
-          encodeURIComponent(value);
-      }
-
-      window.location.href = destination;
-    });
-
-    backButton.addEventListener("click", function () {
-      window.history.back();
-    });
-
-    const focusableElements =
-      Array.from(document.querySelectorAll(".focusable"));
+    const navigationItems =
+      Array.from(document.querySelectorAll("[data-nav]"));
 
     let currentIndex = 0;
 
-    function focusCurrentElement() {
-      focusableElements[currentIndex].focus();
+    function showStatus(message) {
+      status.textContent = message;
     }
 
-   document.addEventListener("keydown", function (event) {
-  const key = event.key;
+    function focusItem(index) {
+      currentIndex =
+        (index + navigationItems.length) %
+        navigationItems.length;
 
-  if (key === "ArrowDown" || key === "ArrowRight") {
-    event.preventDefault();
-
-    currentIndex =
-      (currentIndex + 1) % focusableElements.length;
-
-    focusCurrentElement();
-    return;
-  }
-
-  if (key === "ArrowUp" || key === "ArrowLeft") {
-    event.preventDefault();
-
-    currentIndex =
-      (currentIndex - 1 + focusableElements.length) %
-      focusableElements.length;
-
-    focusCurrentElement();
-    return;
-  }
-
-  if (key === "Enter") {
-    event.preventDefault();
-
-    const selectedElement =
-      focusableElements[currentIndex];
-
-    document.getElementById("status").textContent =
-      "선택 입력이 감지되었습니다.";
-
-    if (selectedElement.tagName === "INPUT") {
-      selectedElement.focus();
-    } else {
-      selectedElement.click();
+      navigationItems[currentIndex].focus();
     }
-  }
-});
 
-    focusCurrentElement();
+    navigationItems.forEach(function (element, index) {
+      element.addEventListener("focus", function () {
+        currentIndex = index;
+
+        const label =
+          element.dataset.label || "항목";
+
+        showStatus("현재 선택: " + label);
+      });
+    });
+
+    function makeDestination(value) {
+      const text = value.trim();
+
+      if (!text) {
+        return null;
+      }
+
+      const hasProtocol =
+        text.startsWith("https://") ||
+        text.startsWith("http://");
+
+      const looksLikeAddress =
+        hasProtocol ||
+        text.includes(".");
+
+      if (looksLikeAddress) {
+        return hasProtocol
+          ? text
+          : "https://" + text;
+      }
+
+      return (
+        "https://www.google.com/search?q=" +
+        encodeURIComponent(text)
+      );
+    }
+
+    function openAddress() {
+      const destination =
+        makeDestination(addressInput.value);
+
+      if (!destination) {
+        showStatus("주소 또는 검색어를 입력하세요.");
+        focusItem(0);
+        return;
+      }
+
+      showStatus("페이지를 여는 중입니다.");
+
+      window.location.assign(destination);
+    }
+
+    function activateFocusedElement() {
+      const activeElement =
+        document.activeElement;
+
+      if (
+        !activeElement ||
+        !activeElement.matches("[data-nav]")
+      ) {
+        showStatus("선택된 항목이 없습니다.");
+        focusItem(currentIndex);
+        return;
+      }
+
+      const label =
+        activeElement.dataset.label || "항목";
+
+      showStatus("선택 입력: " + label);
+
+      /*
+       * 입력창에서는 기본 Enter 동작을 유지합니다.
+       * 글래스의 문자 입력 화면이 열릴 수 있도록
+       * 강제로 click을 호출하지 않습니다.
+       */
+      if (activeElement === addressInput) {
+        addressInput.focus();
+        return;
+      }
+
+      activeElement.click();
+    }
+
+    openButton.addEventListener("click", function () {
+      openAddress();
+    });
+
+    addressInput.addEventListener("keydown", function (event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        openAddress();
+      }
+    });
+
+    testButton.addEventListener("click", function () {
+      showStatus("선택 기능이 정상 작동합니다.");
+    });
+
+    backButton.addEventListener("click", function () {
+      showStatus("뒤로가기를 실행합니다.");
+
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        showStatus("이전 페이지가 없습니다.");
+      }
+    });
+
+    homeButton.addEventListener("click", function () {
+      addressInput.value = "";
+      showStatus("처음 화면으로 돌아왔습니다.");
+      focusItem(0);
+    });
+
+    window.addEventListener(
+      "keydown",
+      function (event) {
+        const key = event.key;
+
+        if (
+          key === "ArrowDown" ||
+          key === "ArrowRight"
+        ) {
+          event.preventDefault();
+          event.stopPropagation();
+
+          focusItem(currentIndex + 1);
+          return;
+        }
+
+        if (
+          key === "ArrowUp" ||
+          key === "ArrowLeft"
+        ) {
+          event.preventDefault();
+          event.stopPropagation();
+
+          focusItem(currentIndex - 1);
+          return;
+        }
+
+        if (
+          key === "Enter" ||
+          event.keyCode === 13
+        ) {
+          /*
+           * 주소 입력창 자체가 선택된 경우에는
+           * 글래스의 기본 입력 동작을 허용합니다.
+           */
+          if (document.activeElement === addressInput) {
+            return;
+          }
+
+          event.preventDefault();
+          event.stopPropagation();
+
+          activateFocusedElement();
+          return;
+        }
+
+        if (
+          key === "Escape" ||
+          event.keyCode === 27
+        ) {
+          event.preventDefault();
+          event.stopPropagation();
+
+          backButton.click();
+        }
+      },
+      true
+    );
+
+    window.addEventListener("load", function () {
+      setTimeout(function () {
+        focusItem(0);
+      }, 300);
+    });
   </script>
 </body>
 </html>
