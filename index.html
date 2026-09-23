@@ -1,21 +1,21 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=600, height=600, initial-scale=1.0, user-scalable=no"
-  >
-
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=600,height=600,initial-scale=1,maximum-scale=1,user-scalable=no">
   <meta name="theme-color" content="#000000">
-
-  <title>Ray-Ban Mini Browser</title>
-
+  <title>Ray-Ban YouTube Player</title>
   <style>
-    * {
-      box-sizing: border-box;
+    :root {
+      color-scheme: dark;
+      --accent: #36f5c5;
+      --panel: #111817;
+      --line: #52625e;
+      --muted: #a8b3b0;
+      --danger: #ff8f8f;
     }
+
+    * { box-sizing: border-box; }
 
     html,
     body {
@@ -23,414 +23,633 @@
       height: 600px;
       margin: 0;
       overflow: hidden;
-
       background: #000;
       color: #fff;
-
-      font-family: Arial, sans-serif;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
     }
 
-    body {
-      padding: 30px;
-    }
+    body { padding: 22px; }
 
     h1 {
-      margin: 0 0 8px;
-      font-size: 34px;
+      margin: 0 0 6px;
+      font-size: 30px;
+      line-height: 1.1;
     }
 
-    .description {
-      margin-bottom: 24px;
-      color: #bbb;
-      font-size: 18px;
+    p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.35;
     }
 
-    .address-bar {
+    .screen {
+      width: 100%;
+      height: 100%;
+    }
+
+    .hidden { display: none !important; }
+
+    .card {
+      margin-top: 20px;
+      padding: 18px;
+      border: 2px solid #263330;
+      border-radius: 18px;
+      background: rgba(12, 20, 18, 0.94);
+    }
+
+    .input-row {
       display: grid;
-      grid-template-columns: 1fr 110px;
+      grid-template-columns: 1fr 112px;
       gap: 12px;
-      margin-bottom: 24px;
+      margin-top: 16px;
     }
 
     input,
-    button,
-    a {
-      border: 3px solid #666;
+    button {
+      min-height: 60px;
+      border: 3px solid var(--line);
       border-radius: 14px;
-
-      background: #161616;
+      background: #111;
       color: #fff;
-
-      font-size: 20px;
+      font: inherit;
+      font-size: 19px;
     }
 
     input {
       min-width: 0;
-      padding: 16px;
+      padding: 0 15px;
     }
 
     button {
-      padding: 16px;
-      cursor: pointer;
-    }
-
-    a {
-      display: flex;
-      min-height: 94px;
-
-      align-items: center;
-      justify-content: center;
-
-      padding: 16px;
-      text-align: center;
-      text-decoration: none;
+      padding: 10px 14px;
+      font-weight: 700;
     }
 
     input:focus,
-    button:focus,
-    a:focus {
-      border-color: #00ffcc;
+    button:focus {
       outline: none;
-      background: #19332d;
-      box-shadow: 0 0 12px rgba(0, 255, 204, 0.65);
+      border-color: var(--accent);
+      background: #17342d;
+      box-shadow: 0 0 0 3px rgba(54, 245, 197, 0.18);
     }
 
-    .shortcuts {
+    .home-actions,
+    .player-actions {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      margin-bottom: 20px;
+      gap: 12px;
+      margin-top: 14px;
     }
 
-    .controls {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-    }
+    .wide { grid-column: 1 / -1; }
 
-    #status {
-      min-height: 48px;
-      margin-top: 22px;
-      padding: 12px;
-
-      border-radius: 10px;
-      background: #101918;
-      color: #9dffeb;
-
-      font-size: 16px;
+    .tip {
+      margin-top: 18px;
+      padding: 14px;
+      border-radius: 12px;
+      background: var(--panel);
+      color: var(--muted);
+      font-size: 15px;
       line-height: 1.4;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: 92px 1fr 92px;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .topbar button {
+      min-height: 52px;
+      padding: 6px;
+      font-size: 16px;
+    }
+
+    .video-title {
+      overflow: hidden;
+      color: #fff;
+      font-size: 17px;
+      font-weight: 700;
+      text-align: center;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    #player-shell {
+      position: relative;
+      width: 556px;
+      height: 313px;
+      overflow: hidden;
+      border: 2px solid #33413e;
+      border-radius: 16px;
+      background: #080808;
+    }
+
+    #player,
+    #player iframe {
+      width: 100% !important;
+      height: 100% !important;
+      border: 0;
+    }
+
+    #player iframe {
+      pointer-events: none;
+    }
+
+    .player-actions button {
+      min-height: 56px;
+      font-size: 17px;
+    }
+
+    .status {
+      min-height: 42px;
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: #0d1715;
+      color: var(--accent);
+      font-size: 15px;
+      line-height: 1.35;
+    }
+
+    .status.error { color: var(--danger); }
+
+    .list-header {
+      display: grid;
+      grid-template-columns: 96px 1fr;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .list-header button {
+      min-height: 52px;
+      padding: 6px;
+      font-size: 16px;
+    }
+
+    #playlist {
+      display: grid;
+      gap: 10px;
+      max-height: 466px;
+      overflow: hidden;
+    }
+
+    .video-item {
+      display: grid;
+      grid-template-columns: 52px 1fr;
+      align-items: center;
+      gap: 12px;
+      min-height: 66px;
+      padding: 8px 14px;
+      text-align: left;
+    }
+
+    .video-number {
+      color: var(--accent);
+      font-size: 21px;
+    }
+
+    .video-id {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
   </style>
 </head>
-
 <body>
-  <h1>Mini Browser</h1>
+  <main id="home-screen" class="screen">
+    <h1>YouTube Player</h1>
+    <p>유튜브 주소 또는 영상 ID를 입력하세요.</p>
 
-  <div class="description">
-    방향키로 이동하고 선택하세요.
-  </div>
+    <section class="card">
+      <label for="video-input">영상 주소</label>
+      <div class="input-row">
+        <input
+          id="video-input"
+          data-nav
+          data-label="영상 주소 입력"
+          type="text"
+          inputmode="url"
+          autocomplete="off"
+          placeholder="youtu.be/... 또는 영상 ID"
+          tabindex="0"
+        >
+        <button id="load-button" data-nav data-label="영상 불러오기" type="button" tabindex="0">
+          불러오기
+        </button>
+      </div>
 
-  <div class="address-bar">
-    <input
-      id="addressInput"
-      data-nav
-      data-label="주소 입력창"
-      type="text"
-      placeholder="주소 또는 검색어"
-      autocomplete="off"
-      tabindex="0"
-    >
+      <div class="home-actions">
+        <button id="sample-button" data-nav data-label="샘플 영상" type="button" tabindex="0">
+          샘플 영상
+        </button>
+        <button id="list-button-home" data-nav data-label="영상 목록" type="button" tabindex="0">
+          영상 목록
+        </button>
+        <button id="clear-button" class="wide" data-nav data-label="목록 비우기" type="button" tabindex="0">
+          저장 목록 비우기
+        </button>
+      </div>
+    </section>
 
-    <button
-      id="openButton"
-      data-nav
-      data-label="열기"
-      type="button"
-      tabindex="0"
-    >
-      열기
-    </button>
-  </div>
+    <div class="tip">
+      방향 이동 → 터치패드 또는 밴드 스와이프<br>
+      선택 → 터치패드 탭 또는 검지-엄지 탭
+    </div>
 
-  <div class="shortcuts">
-    <a
-      data-nav
-      data-label="YouTube"
-      tabindex="0"
-      href="https://m.youtube.com/"
-    >
-      YouTube
-    </a>
+    <div id="home-status" class="status">앱이 준비되었습니다.</div>
+  </main>
 
-    <a
-      data-nav
-      data-label="Google"
-      tabindex="0"
-      href="https://www.google.com/"
-    >
-      Google
-    </a>
+  <main id="player-screen" class="screen hidden">
+    <div class="topbar">
+      <button id="player-back" data-nav data-label="홈으로" type="button" tabindex="0">홈</button>
+      <div id="video-title" class="video-title">영상 준비 중</div>
+      <button id="player-list" data-nav data-label="영상 목록" type="button" tabindex="0">목록</button>
+    </div>
 
-    <a
-      data-nav
-      data-label="Wikipedia"
-      tabindex="0"
-      href="https://www.wikipedia.org/"
-    >
-      Wikipedia
-    </a>
+    <div id="player-shell">
+      <div id="player"></div>
+    </div>
 
-    <button
-      id="testButton"
-      data-nav
-      data-label="선택 테스트"
-      type="button"
-      tabindex="0"
-    >
-      선택 테스트
-    </button>
-  </div>
+    <div class="player-actions">
+      <button id="previous-button" data-nav data-label="이전 영상" type="button" tabindex="0">이전</button>
+      <button id="play-button" data-nav data-label="재생 또는 일시정지" type="button" tabindex="0">재생</button>
+      <button id="next-button" data-nav data-label="다음 영상" type="button" tabindex="0">다음</button>
+      <button id="restart-button" data-nav data-label="처음부터 재생" type="button" tabindex="0">처음부터</button>
+    </div>
 
-  <div class="controls">
-    <button
-      id="backButton"
-      data-nav
-      data-label="뒤로"
-      type="button"
-      tabindex="0"
-    >
-      뒤로
-    </button>
+    <div id="player-status" class="status">YouTube 플레이어를 불러오는 중입니다.</div>
+  </main>
 
-    <button
-      id="homeButton"
-      data-nav
-      data-label="처음으로"
-      type="button"
-      tabindex="0"
-    >
-      처음으로
-    </button>
-  </div>
-
-  <div id="status">
-    앱이 준비되었습니다.
-  </div>
+  <main id="list-screen" class="screen hidden">
+    <div class="list-header">
+      <button id="list-back" data-nav data-label="이전 화면" type="button" tabindex="0">뒤로</button>
+      <h1>영상 목록</h1>
+    </div>
+    <div id="playlist"></div>
+    <div id="list-status" class="status">영상을 선택하세요.</div>
+  </main>
 
   <script>
-    const addressInput =
-      document.getElementById("addressInput");
+    const SAMPLE_VIDEO_ID = "M7lc1UVf-VE";
+    const STORAGE_KEY = "rayban-youtube-playlist-v1";
 
-    const openButton =
-      document.getElementById("openButton");
+    const screens = {
+      home: document.getElementById("home-screen"),
+      player: document.getElementById("player-screen"),
+      list: document.getElementById("list-screen")
+    };
 
-    const testButton =
-      document.getElementById("testButton");
+    const videoInput = document.getElementById("video-input");
+    const homeStatus = document.getElementById("home-status");
+    const playerStatus = document.getElementById("player-status");
+    const listStatus = document.getElementById("list-status");
+    const videoTitle = document.getElementById("video-title");
+    const playButton = document.getElementById("play-button");
+    const playlistElement = document.getElementById("playlist");
 
-    const backButton =
-      document.getElementById("backButton");
+    let currentScreen = "home";
+    let previousScreen = "home";
+    let currentFocusIndex = 0;
+    let currentVideoIndex = -1;
+    let player = null;
+    let playerReady = false;
+    let pendingVideoId = null;
 
-    const homeButton =
-      document.getElementById("homeButton");
+    let playlist = loadPlaylist();
 
-    const status =
-      document.getElementById("status");
-
-    const navigationItems =
-      Array.from(document.querySelectorAll("[data-nav]"));
-
-    let currentIndex = 0;
-
-    function showStatus(message) {
-      status.textContent = message;
+    function loadPlaylist() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        return Array.isArray(saved) ? saved.filter(isVideoId) : [];
+      } catch (error) {
+        return [];
+      }
     }
 
-    function focusItem(index) {
-      currentIndex =
-        (index + navigationItems.length) %
-        navigationItems.length;
-
-      navigationItems[currentIndex].focus();
+    function savePlaylist() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(playlist));
     }
 
-    navigationItems.forEach(function (element, index) {
-      element.addEventListener("focus", function () {
-        currentIndex = index;
+    function isVideoId(value) {
+      return typeof value === "string" && /^[A-Za-z0-9_-]{11}$/.test(value);
+    }
 
-        const label =
-          element.dataset.label || "항목";
+    function parseVideoId(value) {
+      const text = String(value || "").trim();
+      if (isVideoId(text)) return text;
 
-        showStatus("현재 선택: " + label);
-      });
-    });
+      try {
+        const url = new URL(text.startsWith("http") ? text : "https://" + text);
 
-    function makeDestination(value) {
-      const text = value.trim();
+        if (url.hostname === "youtu.be") {
+          return url.pathname.split("/").filter(Boolean)[0] || null;
+        }
 
-      if (!text) {
+        if (url.hostname.includes("youtube.com")) {
+          if (url.pathname === "/watch") return url.searchParams.get("v");
+
+          const parts = url.pathname.split("/").filter(Boolean);
+          if (["shorts", "embed", "live"].includes(parts[0])) return parts[1] || null;
+        }
+      } catch (error) {
         return null;
       }
 
-      const hasProtocol =
-        text.startsWith("https://") ||
-        text.startsWith("http://");
-
-      const looksLikeAddress =
-        hasProtocol ||
-        text.includes(".");
-
-      if (looksLikeAddress) {
-        return hasProtocol
-          ? text
-          : "https://" + text;
-      }
-
-      return (
-        "https://www.google.com/search?q=" +
-        encodeURIComponent(text)
-      );
+      return null;
     }
 
-    function openAddress() {
-      const destination =
-        makeDestination(addressInput.value);
+    function setStatus(element, message, isError = false) {
+      element.textContent = message;
+      element.classList.toggle("error", isError);
+    }
 
-      if (!destination) {
-        showStatus("주소 또는 검색어를 입력하세요.");
-        focusItem(0);
+    function visibleNavigationItems() {
+      return Array.from(
+        screens[currentScreen].querySelectorAll("[data-nav]:not([disabled])")
+      ).filter((element) => element.offsetParent !== null);
+    }
+
+    function focusItem(index) {
+      const items = visibleNavigationItems();
+      if (!items.length) return;
+
+      currentFocusIndex = (index + items.length) % items.length;
+      items[currentFocusIndex].focus();
+    }
+
+    function syncFocusIndex() {
+      const items = visibleNavigationItems();
+      const index = items.indexOf(document.activeElement);
+      if (index >= 0) currentFocusIndex = index;
+    }
+
+    function showScreen(name, focusIndex = 0) {
+      Object.entries(screens).forEach(([key, screen]) => {
+        screen.classList.toggle("hidden", key !== name);
+      });
+
+      previousScreen = currentScreen;
+      currentScreen = name;
+
+      if (name === "list") renderPlaylist();
+
+      setTimeout(() => focusItem(focusIndex), 60);
+    }
+
+    function addVideo(videoId) {
+      if (!isVideoId(videoId)) return -1;
+
+      const existingIndex = playlist.indexOf(videoId);
+      if (existingIndex >= 0) return existingIndex;
+
+      playlist.push(videoId);
+      savePlaylist();
+      return playlist.length - 1;
+    }
+
+    function requestVideo(videoId) {
+      if (!isVideoId(videoId)) {
+        setStatus(homeStatus, "올바른 YouTube 주소나 11자리 영상 ID를 입력하세요.", true);
         return;
       }
 
-      showStatus("페이지를 여는 중입니다.");
+      currentVideoIndex = addVideo(videoId);
+      pendingVideoId = videoId;
+      videoTitle.textContent = "영상 · " + videoId;
+      showScreen("player", 0);
 
-      window.location.assign(destination);
+      if (playerReady && player) {
+        player.cueVideoById(videoId);
+        setStatus(playerStatus, "영상이 준비되었습니다. 재생을 선택하세요.");
+      } else {
+        setStatus(playerStatus, "YouTube 플레이어를 불러오는 중입니다.");
+      }
+    }
+
+    function submitInput() {
+      const videoId = parseVideoId(videoInput.value);
+      if (!videoId || !isVideoId(videoId)) {
+        setStatus(homeStatus, "주소를 확인하세요. YouTube 링크 또는 영상 ID가 필요합니다.", true);
+        return;
+      }
+
+      setStatus(homeStatus, "영상을 준비합니다.");
+      requestVideo(videoId);
+    }
+
+    function renderPlaylist() {
+      playlistElement.replaceChildren();
+
+      if (!playlist.length) {
+        const empty = document.createElement("p");
+        empty.textContent = "저장된 영상이 없습니다.";
+        playlistElement.appendChild(empty);
+        setStatus(listStatus, "홈에서 YouTube 주소를 추가하세요.");
+        return;
+      }
+
+      playlist.forEach((videoId, index) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "video-item";
+        button.dataset.nav = "";
+        button.dataset.label = "영상 " + (index + 1);
+        button.tabIndex = 0;
+        button.innerHTML =
+          '<span class="video-number">' + (index + 1) + '</span>' +
+          '<span class="video-id">' + videoId + '</span>';
+
+        button.addEventListener("click", () => {
+          currentVideoIndex = index;
+          requestVideo(videoId);
+        });
+
+        playlistElement.appendChild(button);
+      });
+
+      setStatus(listStatus, playlist.length + "개의 영상이 저장되어 있습니다.");
+    }
+
+    function playPrevious() {
+      if (!playlist.length) return;
+      currentVideoIndex = (currentVideoIndex - 1 + playlist.length) % playlist.length;
+      requestVideo(playlist[currentVideoIndex]);
+    }
+
+    function playNext() {
+      if (!playlist.length) return;
+      currentVideoIndex = (currentVideoIndex + 1) % playlist.length;
+      requestVideo(playlist[currentVideoIndex]);
+    }
+
+    function togglePlayback() {
+      if (!playerReady || !player) {
+        setStatus(playerStatus, "플레이어가 아직 준비되지 않았습니다.", true);
+        return;
+      }
+
+      const state = player.getPlayerState();
+      if (state === YT.PlayerState.PLAYING) {
+        player.pauseVideo();
+      } else {
+        player.playVideo();
+      }
+    }
+
+    function restartVideo() {
+      if (!playerReady || !player) return;
+      player.seekTo(0, true);
+      player.playVideo();
+    }
+
+    function goBackInsideApp() {
+      if (currentScreen === "player") {
+        showScreen("home", 0);
+      } else if (currentScreen === "list") {
+        showScreen(previousScreen === "player" ? "player" : "home", 0);
+      }
     }
 
     function activateFocusedElement() {
-      const activeElement =
-        document.activeElement;
+      const active = document.activeElement;
+      if (!active || !active.matches("[data-nav]")) return;
 
-      if (
-        !activeElement ||
-        !activeElement.matches("[data-nav]")
-      ) {
-        showStatus("선택된 항목이 없습니다.");
-        focusItem(currentIndex);
+      if (active.tagName === "INPUT") {
+        active.focus();
         return;
       }
 
-      const label =
-        activeElement.dataset.label || "항목";
-
-      showStatus("선택 입력: " + label);
-
-      /*
-       * 입력창에서는 기본 Enter 동작을 유지합니다.
-       * 글래스의 문자 입력 화면이 열릴 수 있도록
-       * 강제로 click을 호출하지 않습니다.
-       */
-      if (activeElement === addressInput) {
-        addressInput.focus();
-        return;
-      }
-
-      activeElement.click();
+      active.click();
     }
 
-    openButton.addEventListener("click", function () {
-      openAddress();
-    });
+    document.addEventListener("focusin", syncFocusIndex);
 
-    addressInput.addEventListener("keydown", function (event) {
+    window.addEventListener("keydown", (event) => {
+      const active = document.activeElement;
+      const isInput = active && active.tagName === "INPUT";
+
       if (event.key === "Enter") {
+        if (isInput) return;
         event.preventDefault();
-        openAddress();
+        event.stopPropagation();
+        activateFocusedElement();
+        return;
+      }
+
+      if (event.key === "Escape") {
+        event.preventDefault();
+        event.stopPropagation();
+        goBackInsideApp();
+        return;
+      }
+
+      if (isInput) return;
+
+      if (event.key === "ArrowDown" || event.key === "ArrowRight") {
+        event.preventDefault();
+        event.stopPropagation();
+        focusItem(currentFocusIndex + 1);
+      }
+
+      if (event.key === "ArrowUp" || event.key === "ArrowLeft") {
+        event.preventDefault();
+        event.stopPropagation();
+        focusItem(currentFocusIndex - 1);
+      }
+    }, true);
+
+    videoInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" && videoInput.value.trim()) {
+        event.preventDefault();
+        submitInput();
       }
     });
 
-    testButton.addEventListener("click", function () {
-      showStatus("선택 기능이 정상 작동합니다.");
+    document.getElementById("load-button").addEventListener("click", submitInput);
+    document.getElementById("sample-button").addEventListener("click", () => requestVideo(SAMPLE_VIDEO_ID));
+    document.getElementById("list-button-home").addEventListener("click", () => showScreen("list", 0));
+    document.getElementById("clear-button").addEventListener("click", () => {
+      playlist = [];
+      currentVideoIndex = -1;
+      savePlaylist();
+      setStatus(homeStatus, "저장된 영상 목록을 비웠습니다.");
     });
 
-    backButton.addEventListener("click", function () {
-      showStatus("뒤로가기를 실행합니다.");
+    document.getElementById("player-back").addEventListener("click", () => showScreen("home", 0));
+    document.getElementById("player-list").addEventListener("click", () => showScreen("list", 0));
+    document.getElementById("list-back").addEventListener("click", goBackInsideApp);
+    document.getElementById("previous-button").addEventListener("click", playPrevious);
+    document.getElementById("next-button").addEventListener("click", playNext);
+    playButton.addEventListener("click", togglePlayback);
+    document.getElementById("restart-button").addEventListener("click", restartVideo);
 
-      if (window.history.length > 1) {
-        window.history.back();
-      } else {
-        showStatus("이전 페이지가 없습니다.");
-      }
-    });
-
-    homeButton.addEventListener("click", function () {
-      addressInput.value = "";
-      showStatus("처음 화면으로 돌아왔습니다.");
-      focusItem(0);
-    });
-
-    window.addEventListener(
-      "keydown",
-      function (event) {
-        const key = event.key;
-
-        if (
-          key === "ArrowDown" ||
-          key === "ArrowRight"
-        ) {
-          event.preventDefault();
-          event.stopPropagation();
-
-          focusItem(currentIndex + 1);
-          return;
-        }
-
-        if (
-          key === "ArrowUp" ||
-          key === "ArrowLeft"
-        ) {
-          event.preventDefault();
-          event.stopPropagation();
-
-          focusItem(currentIndex - 1);
-          return;
-        }
-
-        if (
-          key === "Enter" ||
-          event.keyCode === 13
-        ) {
-          /*
-           * 주소 입력창 자체가 선택된 경우에는
-           * 글래스의 기본 입력 동작을 허용합니다.
-           */
-          if (document.activeElement === addressInput) {
-            return;
+    window.onYouTubeIframeAPIReady = function () {
+      player = new YT.Player("player", {
+        width: 556,
+        height: 313,
+        videoId: SAMPLE_VIDEO_ID,
+        playerVars: {
+          autoplay: 0,
+          controls: 0,
+          disablekb: 1,
+          fs: 0,
+          playsinline: 1,
+          rel: 0,
+          modestbranding: 1,
+          origin: window.location.origin
+        },
+        events: {
+          onReady: function () {
+            playerReady = true;
+            const videoId = pendingVideoId || SAMPLE_VIDEO_ID;
+            player.cueVideoById(videoId);
+            setStatus(playerStatus, "영상이 준비되었습니다. 재생을 선택하세요.");
+          },
+          onStateChange: function (event) {
+            if (event.data === YT.PlayerState.PLAYING) {
+              playButton.textContent = "일시정지";
+              setStatus(playerStatus, "재생 중");
+            } else if (event.data === YT.PlayerState.PAUSED) {
+              playButton.textContent = "재생";
+              setStatus(playerStatus, "일시정지됨");
+            } else if (event.data === YT.PlayerState.ENDED) {
+              playButton.textContent = "재생";
+              setStatus(playerStatus, "재생이 끝났습니다.");
+            } else if (event.data === YT.PlayerState.CUED) {
+              playButton.textContent = "재생";
+              setStatus(playerStatus, "영상이 준비되었습니다. 재생을 선택하세요.");
+            }
+          },
+          onError: function (event) {
+            const messages = {
+              2: "영상 주소 또는 ID가 올바르지 않습니다.",
+              5: "이 영상은 현재 플레이어에서 재생할 수 없습니다.",
+              100: "삭제되었거나 비공개 영상입니다.",
+              101: "영상 소유자가 외부 재생을 허용하지 않았습니다.",
+              150: "영상 소유자가 외부 재생을 허용하지 않았습니다."
+            };
+            setStatus(playerStatus, messages[event.data] || "YouTube 재생 오류가 발생했습니다.", true);
           }
-
-          event.preventDefault();
-          event.stopPropagation();
-
-          activateFocusedElement();
-          return;
         }
+      });
+    };
 
-        if (
-          key === "Escape" ||
-          event.keyCode === 27
-        ) {
-          event.preventDefault();
-          event.stopPropagation();
+    const youtubeApi = document.createElement("script");
+    youtubeApi.src = "https://www.youtube.com/iframe_api";
+    youtubeApi.async = true;
+    youtubeApi.onerror = function () {
+      setStatus(playerStatus, "YouTube 플레이어 API를 불러오지 못했습니다.", true);
+      setStatus(homeStatus, "이 글래스 환경에서 YouTube API가 차단될 수 있습니다.", true);
+    };
+    document.head.appendChild(youtubeApi);
 
-          backButton.click();
-        }
-      },
-      true
-    );
-
-    window.addEventListener("load", function () {
-      setTimeout(function () {
-        focusItem(0);
-      }, 300);
+    window.addEventListener("load", () => {
+      setTimeout(() => focusItem(0), 300);
     });
   </script>
 </body>
