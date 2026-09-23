@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Ray-Ban Mini Browser</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 600px;
+      height: 600px;
+      margin: 0;
+      padding: 36px;
+      overflow: hidden;
+
+      background: #000;
+      color: #fff;
+
+      font-family: Arial, sans-serif;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: 32px;
+    }
+
+    .description {
+      margin-bottom: 28px;
+      color: #cccccc;
+      font-size: 18px;
+    }
+
+    form {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 30px;
+    }
+
+    input {
+      flex: 1;
+      min-width: 0;
+      padding: 18px;
+
+      border: 3px solid #777;
+      border-radius: 14px;
+
+      background: #171717;
+      color: white;
+      font-size: 20px;
+    }
+
+    button,
+    .shortcut {
+      padding: 18px;
+
+      border: 3px solid #777;
+      border-radius: 14px;
+
+      background: #171717;
+      color: white;
+      font-size: 20px;
+      text-decoration: none;
+    }
+
+    button:focus,
+    input:focus,
+    .shortcut:focus {
+      border-color: #00ffcc;
+      outline: none;
+      background: #263330;
+    }
+
+    .shortcuts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .shortcut {
+      display: flex;
+      min-height: 110px;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .status {
+      margin-top: 30px;
+      color: #9dffeb;
+      font-size: 16px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Mini Browser</h1>
+
+  <div class="description">
+    주소 또는 검색어를 입력하세요.
+  </div>
+
+  <form id="searchForm">
+    <input
+      id="address"
+      class="focusable"
+      type="text"
+      placeholder="검색어 또는 주소"
+      autocomplete="off"
+    >
+
+    <button class="focusable" type="submit">
+      열기
+    </button>
+  </form>
+
+  <div class="shortcuts">
+    <a
+      class="shortcut focusable"
+      href="https://www.youtube.com/"
+    >
+      YouTube
+    </a>
+
+    <a
+      class="shortcut focusable"
+      href="https://www.google.com/"
+    >
+      Google
+    </a>
+
+    <a
+      class="shortcut focusable"
+      href="https://www.wikipedia.org/"
+    >
+      Wikipedia
+    </a>
+
+    <button
+      id="backButton"
+      class="shortcut focusable"
+      type="button"
+    >
+      뒤로
+    </button>
+  </div>
+
+  <div id="status" class="status">
+    방향키로 이동하고 Enter로 선택하세요.
+  </div>
+
+  <script>
+    const form = document.getElementById("searchForm");
+    const address = document.getElementById("address");
+    const backButton = document.getElementById("backButton");
+
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      const value = address.value.trim();
+
+      if (!value) {
+        return;
+      }
+
+      let destination;
+
+      const looksLikeUrl =
+        value.startsWith("http://") ||
+        value.startsWith("https://") ||
+        value.includes(".");
+
+      if (looksLikeUrl) {
+        destination = value.startsWith("http")
+          ? value
+          : "https://" + value;
+      } else {
+        destination =
+          "https://www.google.com/search?q=" +
+          encodeURIComponent(value);
+      }
+
+      window.location.href = destination;
+    });
+
+    backButton.addEventListener("click", function () {
+      window.history.back();
+    });
+
+    const focusableElements =
+      Array.from(document.querySelectorAll(".focusable"));
+
+    let currentIndex = 0;
+
+    function focusCurrentElement() {
+      focusableElements[currentIndex].focus();
+    }
+
+    document.addEventListener("keydown", function (event) {
+      if (
+        event.key === "ArrowDown" ||
+        event.key === "ArrowRight"
+      ) {
+        event.preventDefault();
+
+        currentIndex =
+          (currentIndex + 1) % focusableElements.length;
+
+        focusCurrentElement();
+      }
+
+      if (
+        event.key === "ArrowUp" ||
+        event.key === "ArrowLeft"
+      ) {
+        event.preventDefault();
+
+        currentIndex =
+          (currentIndex - 1 + focusableElements.length) %
+          focusableElements.length;
+
+        focusCurrentElement();
+      }
+    });
+
+    focusCurrentElement();
+  </script>
+</body>
+</html>
