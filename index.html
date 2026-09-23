@@ -204,32 +204,46 @@
       focusableElements[currentIndex].focus();
     }
 
-    document.addEventListener("keydown", function (event) {
-      if (
-        event.key === "ArrowDown" ||
-        event.key === "ArrowRight"
-      ) {
-        event.preventDefault();
+   document.addEventListener("keydown", function (event) {
+  const key = event.key;
 
-        currentIndex =
-          (currentIndex + 1) % focusableElements.length;
+  if (key === "ArrowDown" || key === "ArrowRight") {
+    event.preventDefault();
 
-        focusCurrentElement();
-      }
+    currentIndex =
+      (currentIndex + 1) % focusableElements.length;
 
-      if (
-        event.key === "ArrowUp" ||
-        event.key === "ArrowLeft"
-      ) {
-        event.preventDefault();
+    focusCurrentElement();
+    return;
+  }
 
-        currentIndex =
-          (currentIndex - 1 + focusableElements.length) %
-          focusableElements.length;
+  if (key === "ArrowUp" || key === "ArrowLeft") {
+    event.preventDefault();
 
-        focusCurrentElement();
-      }
-    });
+    currentIndex =
+      (currentIndex - 1 + focusableElements.length) %
+      focusableElements.length;
+
+    focusCurrentElement();
+    return;
+  }
+
+  if (key === "Enter") {
+    event.preventDefault();
+
+    const selectedElement =
+      focusableElements[currentIndex];
+
+    document.getElementById("status").textContent =
+      "선택 입력이 감지되었습니다.";
+
+    if (selectedElement.tagName === "INPUT") {
+      selectedElement.focus();
+    } else {
+      selectedElement.click();
+    }
+  }
+});
 
     focusCurrentElement();
   </script>
